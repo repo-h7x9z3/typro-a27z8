@@ -15,7 +15,7 @@ export function initializeAboutModal() {
   // Set about modal title and logo
   if (aboutModalLogo) {
     const img = document.createElement("img");
-    img.src = "assets/logo.svg"; // Main logo is always logo.svg
+    img.src = "https://repo-h7x9z3.github.io/typro-a27z8/assets/logo.svg"; // Main logo is always logo.svg
     img.alt = "Logo";
     img.style.width = "200px"; // Adjust size as needed
     img.style.height = "auto";
@@ -105,4 +105,5 @@ function cerrarModal(modalId) {
     modal.style.display = "none";
   }
 }
+
 
