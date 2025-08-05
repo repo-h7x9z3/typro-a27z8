@@ -169,6 +169,8 @@ export function importarHistorial(file) {
 }
 
 import { construirYEnviarSondeo } from "./survey.js";
+import { createSurveyPersisteModal } from "./surveyPersisteModal.js";
+import { construirYEnviarSondeoPersiste } from "./surveyPersiste.js";
 
 export function mostrarHistorial() {
   let historial = JSON.parse(localStorage.getItem("historial")) || [];
@@ -277,6 +279,35 @@ export function mostrarHistorial() {
         }
       });
       actionsCell.appendChild(openSurveyModalButton);
+
+      // Open Persistent Survey Modal Button
+      const openPersisteModalButton = document.createElement("button");
+      openPersisteModalButton.title = "Abrir Cliente Persiste";
+      openPersisteModalButton.innerHTML =
+        '<i class="material-icons">launch</i>';
+      openPersisteModalButton.addEventListener("click", () => {
+        const sondeoPersisteData = JSON.parse(
+          localStorage.getItem("sondeoPersiste")
+        );
+        const surveyPersisteUrl = sondeoPersisteData
+          ? sondeoPersisteData.surveyUrl
+          : null;
+        if (surveyPersisteUrl) {
+          // Open Modal
+          let modal = document.getElementById("surveyPersisteModal");
+          if (!modal) {
+            createSurveyPersisteModal();
+          }
+          construirYEnviarSondeoPersiste(surveyPersisteUrl);
+          window.abrirModal("surveyPersisteModal");
+        } else {
+          window.showNotification(
+            "No hay URL de sondeo persistente para esta entrada.",
+            "error"
+          );
+        }
+      });
+      actionsCell.appendChild(openPersisteModalButton);
 
       // Delete Button
       const deleteButton = document.createElement("button");

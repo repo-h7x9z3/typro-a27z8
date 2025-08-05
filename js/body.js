@@ -6,7 +6,7 @@ document.body.innerHTML = `
           <div class="header-info">
             <div class="header-left">
               <div id="mainLogoContainer" class="logo-container">
-                <img src="https://repo-h7x9z3.github.io/typro-a27z8/assets/logo.svg" alt="Logo Principal" style="max-width: 100%; height: auto;">
+                <img src="assets/logo.svg" alt="Logo Principal" style="max-width: 100%; height: auto;">
               </div>
               <div class="tipificacion-container">
                 <span id="tipificacionSeleccionada"
@@ -130,8 +130,18 @@ document.body.innerHTML = `
                 id="enviarSondeoBtn"
                 class="secondary"
                 style="display: none"
+                disabled
               >
                 <i class="material-icons">send</i> Enviar Sondeo
+              </button>
+              <button
+                type="button"
+                id="enviarPersisteBtn"
+                class="secondary"
+                style="display: none; margin-left: 10px;"
+                disabled
+              >
+                <i class="material-icons">send</i> Enviar Cliente persiste
               </button>
               <button
                 type="button"
@@ -790,6 +800,15 @@ document.body.innerHTML = `
                   <option value="" disabled selected>Seleccione</option>
                   <option value="Sí">Sí</option>
                   <option value="No">No</option>
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label for="perdidaMonitoreo">¿Tiene perdida de monitoreo?</label>
+                <select id="perdidaMonitoreo">
+                  <option value="" disabled selected>Seleccione</option>
+                  <option value="SI">SI</option>
+                  <option value="NO">NO</option>
                 </select>
               </div>
             </div>

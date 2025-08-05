@@ -31,10 +31,53 @@ import { initializeLogin } from "./login.js";
 import { initializeTagsModal } from "./tagsModal.js";
 import { initializeAboutModal } from "./aboutModal.js";
 import { createSurveyModal } from "./surveyModal.js";
+import { createSurveyPersisteModal } from "./surveyPersisteModal.js"; // New import
+import {
+  buildSurveyPersisteUrl,
+  construirYEnviarSondeoPersiste,
+  collectSurveyPersisteData,
+  formDataForSurveyPersiste,
+  saveSurveyPersisteUrlToHistory,
+} from "./surveyPersiste.js"; // New import
 import { setupGenobsTabs } from "./genobs.js"; // Import the new module
 
 // Global variable to store main form data
 let mainFormData = {};
+
+// Function to show the survey persiste modal with the latest URL
+const showSurveyPersisteModal = (urlToOpen = null) => {
+  let url = urlToOpen;
+  if (!url) {
+    const sondeoData = JSON.parse(localStorage.getItem("sondeoPersiste"));
+    url = sondeoData ? sondeoData.surveyUrl : null;
+  }
+
+  if (!url) {
+    window.showNotification(
+      "No se pudo obtener la URL del cliente persiste.",
+      "error"
+    );
+    return;
+  }
+
+  console.log("Opening survey persiste modal with URL:", url);
+
+  // First ensure the modal exists
+  let modal = document.getElementById("surveyPersisteModal");
+  if (!modal) {
+    console.log("Survey persiste modal not found, creating it...");
+    createSurveyPersisteModal();
+    modal = document.getElementById("surveyPersisteModal");
+  }
+
+  // Configure the survey persiste modal with the URL first
+  construirYEnviarSondeoPersiste(url);
+
+  // Then open the modal using the standard function
+  abrirModal("surveyPersisteModal");
+
+  console.log("Survey persiste modal opened");
+};
 
 // Function to handle tab switching for modals with config-like navigation
 const setupConfigTabs = (modalId) => {
@@ -183,10 +226,12 @@ window.guardarTipificacion = (tipo) => {
 
 window.generarObservacionPrincipal = () => {
   const datosForm = document.getElementById("datosForm");
-  const enviarSondeoBtn = document.getElementById("enviarSondeoBtn");
   mainFormData = {}; // Clear previous data
 
   const selectedTypification = localStorage.getItem("selectedTypification");
+
+  const enviarSondeoBtn = document.getElementById("enviarSondeoBtn");
+  const enviarPersisteBtn = document.getElementById("enviarPersisteBtn");
 
   let requiredMainFields = [];
 
@@ -196,6 +241,7 @@ window.generarObservacionPrincipal = () => {
       "clienteNombre",
       "clienteRUT",
       "clienteTelefono",
+      "clienteContrato",
     ];
   } else {
     requiredMainFields = [
@@ -209,6 +255,7 @@ window.generarObservacionPrincipal = () => {
       "clienteTarjeta",
       "clientePuerto",
       "clienteNodo",
+      "clienteContrato",
     ];
   }
 
@@ -272,6 +319,9 @@ window.generarObservacionPrincipal = () => {
         case "clienteRUT":
           key = "RUT";
           break;
+        case "clienteContrato":
+          key = "CONTRATO";
+          break;
         case "clienteTelefono":
           key = "TELÉFONO";
           break;
@@ -321,11 +371,66 @@ window.generarObservacionPrincipal = () => {
   enviarSondeoBtn.style.display = "inline-flex";
   enviarSondeoBtn.disabled = false;
 
+  // Make the "Enviar Sondeo Persistente" button visible and enabled
+  enviarPersisteBtn.style.display = "inline-flex";
+  enviarPersisteBtn.disabled = false;
+
+  // Attach event listeners (moved from DOMContentLoaded)
+  enviarSondeoBtn.onclick = () => {
+    const sondeoData = JSON.parse(localStorage.getItem("sondeo"));
+    const surveyUrl = sondeoData ? sondeoData.surveyUrl : null;
+
+    if (!surveyUrl) {
+      window.showNotification(
+        "No se encontró URL de sondeo. Genere la observación primero.",
+        "error"
+      );
+      return;
+    }
+    showSurveyModal(surveyUrl);
+  };
+
+  enviarPersisteBtn.onclick = () => {
+    const sondeoPersisteData = JSON.parse(
+      localStorage.getItem("sondeoPersiste")
+    );
+    const surveyPersisteUrl = sondeoPersisteData
+      ? sondeoPersisteData.surveyUrl
+      : null;
+
+    if (!surveyPersisteUrl) {
+      window.showNotification(
+        "No se encontró URL de cliente persiste. Genere la observación primero.",
+        "error"
+      );
+      return;
+    }
+    showSurveyPersisteModal(surveyPersisteUrl);
+  };
+
+  // Collect all survey persiste data
+  collectSurveyPersisteData();
+
+  // Build the survey persiste URL and store it in formDataForSurveyPersiste
+  const generatedSurveyPersisteUrl = buildSurveyPersisteUrl();
+  if (generatedSurveyPersisteUrl) {
+    formDataForSurveyPersiste.surveyUrl = generatedSurveyPersisteUrl;
+    // Save the generated URL to history immediately
+    saveSurveyPersisteUrlToHistory(generatedSurveyPersisteUrl);
+  }
+
+  // Save all survey persiste data (including the URL) to local storage
+  localStorage.setItem(
+    "sondeoPersiste",
+    JSON.stringify(formDataForSurveyPersiste)
+  );
+
   // Construct a preliminary observation from main form data
   let preliminaryObservation = `NOMBRE: ${mainFormData["NOMBRE"] || ""}\n`; // NOMBRE first
 
   const preliminaryOrder = [
     "RUT",
+    "CONTRATO",
     "DIRECCION",
     "ONT",
     "OLT",
@@ -354,6 +459,10 @@ window.generarObservacionPrincipal = () => {
       } TEL: ${mainFormData["TELÉFONO"] || ""}\n`;
     }
   });
+  // Add "TIENE PERDIDA DE MONITOREO?" to the observation
+  if (formDataForSurvey["TIENE PERDIDA DE MONITOREO?"]) {
+    preliminaryObservation += `¿Tiene perdida de monitoreo?:${formDataForSurvey["TIENE PERDIDA DE MONITOREO?"]}\n`;
+  }
   for (const key in mainFormData) {
     // Exclude ID, TELÉFONO, and NOMBRE from this loop as they are now handled
     if (
@@ -416,9 +525,16 @@ window.limpiarFormulario = () => {
   });
 
   const enviarSondeoBtn = document.getElementById("enviarSondeoBtn");
+  const enviarPersisteBtn = document.getElementById("enviarPersisteBtn");
+
   if (enviarSondeoBtn) {
     enviarSondeoBtn.style.display = "none"; // Hide the button on clear
     enviarSondeoBtn.disabled = true; // Disable the button on clear
+  }
+
+  if (enviarPersisteBtn) {
+    enviarPersisteBtn.style.display = "none"; // Hide the button on clear
+    enviarPersisteBtn.disabled = true; // Disable the button on clear
   }
 
   mainFormData = {}; // Clear stored main form data
@@ -436,6 +552,7 @@ window.limpiarFormulario = () => {
     "soporteGenerado",
     "instalacionReparacion",
     "estadoLuces",
+    "perdidaMonitoreo",
   ];
 
   genobsFields.forEach((fieldId) => {
@@ -652,6 +769,7 @@ window.generarObservacionFinal = () => {
   if (cambioPilas)
     sondeo += `¿Se realizaron cambios de pilas del control remoto?:${cambioPilas}\n`;
   if (pruebaCruzada) sondeo += `¿Se hizo prueba cruzada?:${pruebaCruzada}\n`;
+  sondeo += `Tiene perdida de monitoreo: Si\n`; // Always add this line
   if (soporteGenerado) sondeo += `Soporte Generado:${soporteGenerado}\n`;
   if (instalacionReparacion && instalacionReparacion !== "No")
     sondeo += `Inconvenientes Instalación/Reparación: ${instalacionReparacion}\n`;
@@ -679,6 +797,7 @@ window.generarObservacionFinal = () => {
   // Add main form data to full observation
   const orderedKeys = [
     "RUT",
+    "CONTRATO",
     "DIRECCIÓN CLIENTE",
     "ONT",
     "OLT",
@@ -705,6 +824,8 @@ window.generarObservacionFinal = () => {
 
   // Add genobs modal data and other survey-related fields to full observation
   // Exclude NOMBRE from this section as it's now handled at the beginning
+  if (formDataForSurvey["CONTRATO"])
+    fullObservation += `CONTRATO: ${formDataForSurvey["CONTRATO"]}\n`;
   if (tiempoFalla)
     fullObservation += `Desde Cuando Presenta la Falla: ${tiempoFalla}\n`;
   if (suministroElectrico)
@@ -718,6 +839,7 @@ window.generarObservacionFinal = () => {
   if (controlRemoto) fullObservation += `Control Remoto: ${controlRemoto}\n`;
   if (cambioPilas) fullObservation += `Cambio Pilas: ${cambioPilas}\n`;
   if (pruebaCruzada) fullObservation += `Prueba Cruzada: ${pruebaCruzada}\n`;
+  fullObservation += `Tiene perdida de monitoreo: Si\n`; // Always add this line
   if (soporteGenerado)
     fullObservation += `Soporte Generado: ${soporteGenerado}\n`;
   if (instalacionReparacion && instalacionReparacion !== "No")
@@ -865,6 +987,17 @@ window.limpiarHistorial = limpiarHistorial; // Expose limpiarHistorial
 
 // Ensure DOM is fully loaded before accessing elements
 document.addEventListener("DOMContentLoaded", () => {
+  // Get logo paths from global variables defined in index.html
+  const mundoImgSrc = window.mundoImgSrc;
+  const konectaImgSrc = window.konectaImgSrc;
+
+  if (mundoImgSrc) {
+    console.log("Mundo Image Source:", mundoImgSrc);
+  }
+  if (konectaImgSrc) {
+    console.log("Konecta Image Source:", konectaImgSrc);
+  }
+
   // Add double-click event listener for tiempoFalla
   const tiempoFallaInput = document.getElementById("tiempoFalla");
   if (tiempoFallaInput) {
@@ -876,6 +1009,20 @@ document.addEventListener("DOMContentLoaded", () => {
         "TiempoFalla dblclick triggered. Value set to:",
         formattedDateTime
       );
+    });
+  }
+
+  const deacuerdoBtn = document.getElementById("deacuerdoBtn");
+  if (deacuerdoBtn && tiempoFallaInput) {
+    deacuerdoBtn.addEventListener("click", () => {
+      if (tiempoFallaInput.value) {
+        window.cerrarModal("genobs");
+      } else {
+        window.showNotification(
+          "Por favor, selecciona una fecha y hora.",
+          "error"
+        );
+      }
     });
   }
 
@@ -900,11 +1047,12 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // Create all modals first to ensure they are in the DOM
   createSurveyModal();
-  initializeAboutModal(); // This also creates the modal
+  createSurveyPersisteModal(); // Create the new persiste modal
   initializeTagsModal(); // This also creates the modal
 
   // Initialize login to control access
   initializeLogin();
+  initializeAboutModal(); // Initialize about modal after login to ensure theme is applied
 
   const openAboutBtn = document.getElementById("openAboutBtn");
   if (openAboutBtn) {
@@ -970,25 +1118,6 @@ document.addEventListener("DOMContentLoaded", () => {
   const openTagsBtn = document.getElementById("openTagsBtn");
   if (openTagsBtn) {
     openTagsBtn.onclick = () => window.abrirModal("tagsModal");
-  }
-
-  const openSurveyModalBtn = document.getElementById("openSurveyModalBtn");
-  const enviarSondeoBtn = document.getElementById("enviarSondeoBtn");
-  if (enviarSondeoBtn) {
-    enviarSondeoBtn.addEventListener("click", () => {
-      const sondeoData = JSON.parse(localStorage.getItem("sondeo"));
-      const surveyUrl = sondeoData ? sondeoData.surveyUrl : null;
-
-      if (!surveyUrl) {
-        window.showNotification(
-          "No se encontró URL de sondeo. Genere la observación primero.",
-          "error"
-        );
-        return;
-      }
-
-      showSurveyModal(surveyUrl);
-    });
   }
 
   // Event listeners for new history modal buttons

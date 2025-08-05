@@ -19,7 +19,7 @@ export function renderFormFields(tipoTipificacion) {
   const commonFields = [
     {
       id: "clienteId",
-      label: "ID Cliente:",
+      label: "ID:",
       type: "text",
       required: true,
       placeholder: "Ej: 123456789",
@@ -30,6 +30,13 @@ export function renderFormFields(tipoTipificacion) {
       type: "text",
       required: true,
       placeholder: "Ej: Juan Pérez",
+    },
+    {
+      id: "clienteContrato",
+      label: "Contrato:",
+      type: "text",
+      required: true,
+      placeholder: "Ej:MTC24/152465",
     },
     {
       id: "clienteRUT",
@@ -95,7 +102,7 @@ export function renderFormFields(tipoTipificacion) {
   const minimalFields = [
     {
       id: "clienteId",
-      label: "ID Cliente:",
+      label: "ID:",
       type: "text",
       required: true,
       placeholder: "Ej: 123456789",
@@ -106,6 +113,13 @@ export function renderFormFields(tipoTipificacion) {
       type: "text",
       required: true,
       placeholder: "Ej: Juan Pérez",
+    },
+    {
+      id: "clienteContrato",
+      label: "Contrato:",
+      type: "text",
+      required: true,
+      placeholder: "Contrato",
     },
     {
       id: "clienteRUT",
@@ -212,6 +226,20 @@ export function renderFormFields(tipoTipificacion) {
       } else {
         formGroup.appendChild(textarea);
       }
+    } else if (field.type === "select") {
+      const select = document.createElement("select");
+      select.id = field.id;
+      select.name = field.id;
+      if (field.required) {
+        select.required = true;
+      }
+      field.options.forEach((optionValue) => {
+        const option = document.createElement("option");
+        option.value = optionValue;
+        option.textContent = optionValue;
+        select.appendChild(option);
+      });
+      formGroup.appendChild(select);
     } else {
       const input = document.createElement("input");
       input.type = field.type;

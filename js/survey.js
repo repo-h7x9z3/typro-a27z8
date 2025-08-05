@@ -12,6 +12,7 @@ export function collectSurveyData() {
     RUT: document.getElementById("clienteRUT")?.value || "",
     "SERVICIO CON LA FALLA":
       document.getElementById("tipoServicio")?.value || "", // Ahora se obtiene de tipoServicio en el modal genobs
+    CONTRATO: document.getElementById("clienteContrato")?.value || "",
     TELÉFONO: (() => {
       const domValue = document.getElementById("clienteTelefono")?.value || "";
       localStorage.setItem("genobs_clienteTelefono", domValue);
@@ -50,12 +51,14 @@ export function collectSurveyData() {
 
   // Data from the genobs modal
   const genobsModalFields = {
+    "PERDIDA DE MONITOREO":
+      document.getElementById("perdidaMonitoreo")?.value || "", // Nuevo campo para pérdida de monitoreo
+    "Desde Cuando Presenta la Falla":
+      document.getElementById("tiempoFalla")?.value || "",
     "Suministro Eléctrico":
       document.getElementById("suministroElectrico")?.value || "",
     "Generador Eléctrico":
       document.getElementById("generadorElectrico")?.value || "",
-    "Desde Cuando Presenta la Falla":
-      document.getElementById("tiempoFalla")?.value || "",
     "Tipo de servicio": document.getElementById("tipoServicio")?.value || "",
     "Inconvenientes Instalación/Reparación": (() => {
       const domValue =
@@ -103,6 +106,25 @@ export function buildSurveyUrl() {
     formDataForSurvey[
       "OBSERVACIÓN CON INFORMACIÓN COMPLETA EN LA VARIBALE SONDEO"
     ];
+  const perdidaMonitoreo = formDataForSurvey["PERDIDA DE MONITOREO"];
+  const contrato = formDataForSurvey["CONTRATO"];
+  const tiempoFalla = formDataForSurvey["Desde Cuando Presenta la Falla"];
+
+  let prefixParts = [];
+  if (perdidaMonitoreo) {
+    prefixParts.push(`¿Tiene perdida de monitoreo?:${perdidaMonitoreo}`);
+  }
+  if (contrato) {
+    prefixParts.push(`Contrato:${contrato}`);
+  }
+
+  let prefix = prefixParts.join("\n");
+  if (prefix) {
+    prefix += "\n"; // Add an extra newline to separate from the main observation
+  }
+
+  // Prepend the prefix to the observation
+  observacion = prefix + observacion;
   if (observacion) {
     // Removals
     observacion = observacion.replace("obs: ", "").replace("OBS:", "");
@@ -145,7 +167,7 @@ export function buildSurveyUrl() {
     selectedTypification === "SAC" ||
     selectedTypification === "Movil"
   ) {
-    requiredFields = ["RUT", "TELÉFONO"];
+    requiredFields = ["RUT", "TELÉFONO", "CONTRATO"];
   } else {
     requiredFields = [
       "RUT",
@@ -157,6 +179,7 @@ export function buildSurveyUrl() {
       "TARJETA",
       "PUERTO",
       "NODO",
+      "CONTRATO",
     ];
   }
 
@@ -182,8 +205,7 @@ export function buildSurveyUrl() {
   }
 
   // Define la URL base para el formulario de sondeo.
-  const baseUrl =
-    "https://docs.google.com/forms/d/e/1FAIpQLSeOA7OULm89gvnyG0q8Fvkr_bCdzXNsnRotRu6_tSmh-lPdLw/viewform?usp=pp_url";
+  const baseUrl = window.SURVEY_BASE_URL;
 
   const urlParams = new URLSearchParams();
 
@@ -193,6 +215,7 @@ export function buildSurveyUrl() {
   // Cada objeto contiene el 'entryId' de Google Forms y la clave correspondiente en 'formDataForSurvey'.
   const surveyFieldMappings = [
     { entryId: "entry.423430974", formDataKey: "ID" }, // CEDULA
+    { entryId: "entry.1234567890", formDataKey: "CONTRATO" }, // CONTRATO
     { entryId: "entry.189057090", formDataKey: "RUT" }, // RUT DEL CLIENTE
     { entryId: "entry.399236047", formDataKey: "SERVICIO CON LA FALLA" }, // Este campo ahora toma su valor de 'tipoServicio'
     { entryId: "entry.302927497", formDataKey: "TELÉFONO" }, // TELEFONO
@@ -233,7 +256,7 @@ export function buildSurveyUrl() {
   });
 
   // Manejo especial para el campo de fecha y hora 'Desde Cuando Presenta la Falla'.
-  const tiempoFalla = formDataForSurvey["Desde Cuando Presenta la Falla"];
+  // This declaration is now at the top of the function.
   if (tiempoFalla) {
     const date = new Date(tiempoFalla);
     urlParams.append("entry.978502501_year", date.getFullYear());

@@ -12,7 +12,7 @@ export function createSurveyModal() {
           <i class="material-icons">close</i>
         </span>
         <h2 class="modal-title">Confirmación de Sondeo</h2>
-        <p class="modal-description">Se ha generado un enlace para el sondeo. Puedes abrirlo directamente o copiar los enlaces para usarlo más tarde.</p>
+        <p class="modal-description">Se ha generado un enlace para el sondeo. Copia el enlace y ábrelo en Firefox para continuar con el proceso.</p>
 
         
 

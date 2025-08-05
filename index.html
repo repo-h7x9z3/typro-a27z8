@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Gestor de Tipificacion</title>
+    <link rel="icon" type="image/svg+xml" href="assets/favicon.svg" />
+    <link
+      href="https://fonts.googleapis.com/icon?family=Material+Icons"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="style.css" />
+    <link rel="stylesheet" href="login.css" />
+    <link rel="stylesheet" href="style-history.css" />
+    <link rel="stylesheet" href="style-themes.css" />
+    <link rel="stylesheet" href="style-genobs.css" />
+    <link rel="stylesheet" href="style-survey-modal.css" />
+    <link rel="stylesheet" href="style-survey-modal-persiste.css" />
+    <link rel="stylesheet" href="style-pip.css" />
+    <link rel="stylesheet" href="style-tmo-modal.css" />
+    <link rel="stylesheet" href="style-alarm.css" />
+    <script>
+      // Synchronously apply theme from localStorage to prevent FOUC
+      (function () {
+        const themes = {
+          tema_mundo: {
+            "--bg-primary": "#0b3f4bff",
+            "--bg-secondary": "#0b3f4bff",
+            "--bg-tertiary": "#a19f0eff",
+            "--text-primary": "#ffffffff",
+            "--text-secondary": "#ffffffff",
+            "--accent-primary": "#a19f0eff",
+            "--accent-hover": "#ffa000",
+            "--danger-color": "#ef4444",
+            "--success-color": "#22c55e",
+            "--icon-color": "#ffffffff",
+            "--button-text-color": "#ffffffff",
+            "--button-bg-color": "#ffda00",
+            "--speedtest-url-color": "#ffffffff",
+            "--logo-color": "#ffffffff",
+            "--input-bg": "#f8feffff",
+            "--input-border": "#ffffffff",
+            "--input-text": "#000000ff",
+            "--input-focus-border": "#ffffffff",
+            "--input-focus-shadow": "rgba(255, 255, 255, 0.4)",
+            "--input-focus-bg": "#a19f0eff",
+            "--input-label-color": "#ffffffff",
+            "--munfo-logo-path": "assets/mundo.svg",
+            "--konecta-logo-path": "assets/konecta.svg",
+          },
+          dark_blue: {
+            "--bg-primary": "#152533",
+            "--bg-secondary": "#2a3b4c",
+            "--bg-tertiary": "#405166",
+            "--text-primary": "#e2e8f0",
+            "--text-secondary": "#94a3b8",
+            "--accent-primary": "#3b82f6",
+            "--accent-hover": "#2563eb",
+            "--danger-color": "#ef4444",
+            "--success-color": "#22c55e",
+            "--icon-color": "#e2e8f0",
+            "--button-text-color": "#e2e8f0",
+            "--button-bg-color": "#3b82f6",
+            "--speedtest-url-color": "#3b82f6",
+            "--logo-color": "#e2e8f0",
+            "--input-bg": "#1e293b",
+            "--input-border": "#3b82f6",
+            "--input-text": "#e2e8f0",
+            "--input-focus-border": "#3b82f6",
+            "--input-focus-shadow": "rgba(59, 130, 246, 0.4)",
+            "--input-focus-bg": "#405166",
+            "--input-label-color": "#94a3b8",
+            "--munfo-logo-path": "assets/munfo.svg",
+            "--konecta-logo-path": "assets/konecta.svg",
+          },
+        };
+        const defaultThemeName =
+          localStorage.getItem("selectedTheme") || "tema_mundo";
+        const theme = themes[defaultThemeName];
+        if (theme) {
+          for (const [key, value] of Object.entries(theme)) {
+            document.documentElement.style.setProperty(key, value);
+          }
+          window.dispatchEvent(new Event("themeChanged"));
+        }
+      })();
+    </script>
+  </head>
+  <body>
+    <div class="logo-container">
+      <img
+        src="assets/logo.svg"
+        alt="Logo de Inicio de Sesión"
+        style="max-width: 200px; height: auto"
+      />
+    </div>
+    <script src="js/assetLoader.js"></script>
+    <script type="module" src="js/body.js"></script>
+    <script type="module" src="js/main.js"></script>
+    <script type="module" src="js/speedtest.js"></script>
+    <script type="module" src="js/alarm.js"></script>
+    <script>
+      window.SURVEY_BASE_URL =
+        "https://docs.google.com/forms/d/e/1FAIpQLSeOA7OULm89gvnyG0q8Fvkr_bCdzXNsnRotRu6_tSmh-lPdLw/viewform?usp=pp_url";
+      window.SURVEY_PERSISTE_BASE_URL =
+        "https://docs.google.com/forms/d/e/1FAIpQLSe8vDX-zzJHeFjWOVi-ci5qFurR1zUc86th2MX7yCNKWq-nvQ/viewform?usp=pp_url";
+    </script>
+    <script type="module">
+      import { abrirModalTipificacion } from "./js/main.js";
+      window.abrirModalTipificacion = abrirModalTipificacion;
+    </script>
+    <!-- Logout Confirmation Modal Container -->
+    <div id="logoutModalContainer"></div>
+
+    <!-- Observation Detail Modal Structure -->
+    <div id="observationDetailModal" class="modal">
+      <div class="modal-content">
+        <span
+          class="close-button material-icons"
+          onclick="cerrarModal('observationDetailModal')"
+          >close</span
+        >
+        <h2>Detalle de Observación</h2>
+        <div class="modal-body">
+          <textarea id="observationDetailText" readonly></textarea>
+        </div>
+        <div class="modal-buttons">
+          <button
+            class="button"
+            onclick="copyToClipboard(document.getElementById('observationDetailText').value); window.showNotification('Observación copiada al portapapeles', 'success');"
+          >
+            Copiar
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Survey Persiste Modal Container -->
+    <div id="surveyPersisteModalContainer"></div>
+
+    <script type="module">
+      import { createSurveyPersisteModal } from "./js/surveyPersisteModal.js";
+      window.createSurveyPersisteModal = createSurveyPersisteModal;
+    </script>
+    <script type="module">
+      import {
+        buildSurveyPersisteUrl,
+        construirYEnviarSondeoPersiste,
+      } from "./js/surveyPersiste.js";
+      window.buildSurveyPersisteUrl = buildSurveyPersisteUrl;
+      window.construirYEnviarSondeoPersiste = construirYEnviarSondeoPersiste;
+    </script>
+  </body>
+</html>

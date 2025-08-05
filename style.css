@@ -1656,6 +1656,34 @@ input:checked + .slider:before {
   align-items: center;
 }
 
+/* Specific styles for dateTimeModal to ensure proper display */
+#dateTimeModal .modal-content {
+  max-width: 400px; /* Adjust as needed for the calendar */
+  padding: 25px;
+  text-align: center;
+}
+
+#dateTimeModal .modal-body {
+  margin-bottom: 20px;
+}
+
+#dateTimeModal #dateTimeInput {
+  width: 100%;
+  padding: 10px;
+  border-radius: 8px;
+  border: 1px solid var(--bg-tertiary);
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+  font-size: 1rem;
+  box-sizing: border-box;
+}
+
+#dateTimeModal .modal-buttons {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+}
+
 .modal-content {
   background-color: var(--bg-secondary);
   color: var(--text-primary);

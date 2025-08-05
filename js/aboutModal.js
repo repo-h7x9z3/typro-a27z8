@@ -15,7 +15,7 @@ export function initializeAboutModal() {
   // Set about modal title and logo
   if (aboutModalLogo) {
     const img = document.createElement("img");
-    img.src = "https://repo-h7x9z3.github.io/typro-a27z8/assets/logo.svg"; // Main logo is always logo.svg
+    img.src = "assets/logo.svg"; // Main logo is always logo.svg
     img.alt = "Logo";
     img.style.width = "200px"; // Adjust size as needed
     img.style.height = "auto";
@@ -32,7 +32,7 @@ export function initializeAboutModal() {
   logosContainer.style.marginTop = "10px";
 
   const mundoImg = document.createElement("img");
-  mundoImg.src = "https://repo-h7x9z3.github.io/typro-a27z8/assets/mundo.svg";
+  mundoImg.src = "assets/mundo.svg";
   mundoImg.alt = "Logo Mundo";
   mundoImg.style.width = "100px";
   mundoImg.style.height = "auto";
@@ -47,7 +47,7 @@ export function initializeAboutModal() {
   logosContainer.appendChild(xSpan);
 
   const konectaImg = document.createElement("img");
-  konectaImg.src = "https://repo-h7x9z3.github.io/typro-a27z8/assets/konecta.svg";
+  konectaImg.src = "assets/konecta.svg";
   konectaImg.alt = "Logo Konecta";
   konectaImg.style.width = "100px";
   konectaImg.style.height = "auto";
@@ -105,5 +105,3 @@ function cerrarModal(modalId) {
     modal.style.display = "none";
   }
 }
-
-
