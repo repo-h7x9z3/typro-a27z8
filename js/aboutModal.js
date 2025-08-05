@@ -77,6 +77,7 @@ export function initializeAboutModal() {
     "Mejora de temas y estética de la interfaz.",
     "Optimización de la página web.",
     "Añadida nueva función de atajos para observación.",
+    "Implementacion envio de Cliente Persiste.",
     "Implementación de envío de sondeo.",
   ];
 
@@ -105,4 +106,5 @@ function cerrarModal(modalId) {
     modal.style.display = "none";
   }
 }
+
 
