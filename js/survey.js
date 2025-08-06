@@ -6,13 +6,19 @@ export function collectSurveyData() {
   const existingSondeoData = JSON.parse(localStorage.getItem("sondeo")) || {};
   const existingSurveyUrl = existingSondeoData.surveyUrl;
 
+  // Clear all existing properties from formDataForSurvey to ensure a fresh start
+  for (const key in formDataForSurvey) {
+    delete formDataForSurvey[key];
+  }
+
   // Data from the main form
-  formDataForSurvey = {
-    ID: localStorage.getItem("documentNumber") || "", // Get user ID from localStorage
+  Object.assign(formDataForSurvey, {
     RUT: document.getElementById("clienteRUT")?.value || "",
     "SERVICIO CON LA FALLA":
       document.getElementById("tipoServicio")?.value || "", // Ahora se obtiene de tipoServicio en el modal genobs
     CONTRATO: document.getElementById("clienteContrato")?.value || "",
+    ID_CLIENTE: document.getElementById("clienteID")?.value || "", // Client ID from the form
+    CEDULA_EJECUTIVO: localStorage.getItem("documentNumber") || "", // Agent's ID from login
     TELÉFONO: (() => {
       const domValue = document.getElementById("clienteTelefono")?.value || "";
       localStorage.setItem("genobs_clienteTelefono", domValue);
@@ -47,7 +53,8 @@ export function collectSurveyData() {
     })(),
     "OBSERVACIÓN CON INFORMACIÓN COMPLETA EN LA VARIBALE SONDEO":
       document.getElementById("observacionForm")?.value || "",
-  };
+    CORREO: document.getElementById("clienteCorreo")?.value || "", // Nuevo campo para el correo
+  });
 
   // Data from the genobs modal
   const genobsModalFields = {
@@ -109,13 +116,21 @@ export function buildSurveyUrl() {
   const perdidaMonitoreo = formDataForSurvey["PERDIDA DE MONITOREO"];
   const contrato = formDataForSurvey["CONTRATO"];
   const tiempoFalla = formDataForSurvey["Desde Cuando Presenta la Falla"];
+  const correo = formDataForSurvey["CORREO"]; // Get the email
+  const clienteID = formDataForSurvey["ID_CLIENTE"]; // Get the client ID
 
   let prefixParts = [];
+  if (contrato) {
+    prefixParts.push(`Contrato:${contrato}`);
+  }
+  if (clienteID) {
+    prefixParts.push(`ID de Llamada:${clienteID}`); // Add client ID to prefix as "ID de Llamada"
+  }
   if (perdidaMonitoreo) {
     prefixParts.push(`¿Tiene perdida de monitoreo?:${perdidaMonitoreo}`);
   }
-  if (contrato) {
-    prefixParts.push(`Contrato:${contrato}`);
+  if (correo) {
+    prefixParts.push(`Correo:${correo}`); // Add email to prefix
   }
 
   let prefix = prefixParts.join("\n");
@@ -214,8 +229,9 @@ export function buildSurveyUrl() {
   // Define un mapeo de los campos del formulario a los IDs de entrada de Google Forms.
   // Cada objeto contiene el 'entryId' de Google Forms y la clave correspondiente en 'formDataForSurvey'.
   const surveyFieldMappings = [
-    { entryId: "entry.423430974", formDataKey: "ID" }, // CEDULA
+    { entryId: "entry.423430974", formDataKey: "CEDULA_EJECUTIVO" }, // Agent's CEDULA
     { entryId: "entry.1234567890", formDataKey: "CONTRATO" }, // CONTRATO
+    { entryId: "entry.189057090", formDataKey: "RUT" }, // RUT DEL CLIENTE
     { entryId: "entry.189057090", formDataKey: "RUT" }, // RUT DEL CLIENTE
     { entryId: "entry.399236047", formDataKey: "SERVICIO CON LA FALLA" }, // Este campo ahora toma su valor de 'tipoServicio'
     { entryId: "entry.302927497", formDataKey: "TELÉFONO" }, // TELEFONO
@@ -245,14 +261,17 @@ export function buildSurveyUrl() {
     { entryId: "entry.1322891023", formDataKey: "Reinicio Eléctrico" },
     { entryId: "entry.1944826262", formDataKey: "Cable HDMI/AV" },
     { entryId: "entry.1322891023", formDataKey: "Observacion TV" },
+    { entryId: "entry.EMAIL_ENTRY_ID", formDataKey: "CORREO" }, // Placeholder for email entry ID
   ];
 
   // Itera sobre el mapeo y añade los parámetros a la URL.
   surveyFieldMappings.forEach((mapping) => {
-    urlParams.append(
-      mapping.entryId,
-      formDataForSurvey[mapping.formDataKey] || ""
-    );
+    let value = formDataForSurvey[mapping.formDataKey] || "";
+    // Special handling for CEDULA_EJECUTIVO to ensure it's always taken from localStorage
+    if (mapping.formDataKey === "CEDULA_EJECUTIVO") {
+      value = localStorage.getItem("documentNumber") || "";
+    }
+    urlParams.append(mapping.entryId, value);
   });
 
   // Manejo especial para el campo de fecha y hora 'Desde Cuando Presenta la Falla'.

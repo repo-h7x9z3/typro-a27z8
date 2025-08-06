@@ -8,9 +8,10 @@ export function collectSurveyPersisteData() {
 
   // Data from the main form
   formDataForSurveyPersiste = {
-    "CEDULA DEL EJECUTIVO": localStorage.getItem("documentNumber") || "", // Get user ID from localStorage
     RUT: document.getElementById("clienteRUT")?.value || "",
     Contrato: document.getElementById("clienteContrato")?.value || "",
+    ID_CLIENTE: document.getElementById("clienteID")?.value || "", // Client ID from the form
+    CEDULA_EJECUTIVO: localStorage.getItem("documentNumber") || "", // Agent's ID from login
     "SERVICIO CON LA FALLA":
       document.getElementById("tipoServicio")?.value || "", // Ahora se obtiene de tipoServicio en el modal genobs
     "TIENE PERDIDA DE MONITOREO?":
@@ -102,6 +103,7 @@ export function collectSurveyPersisteData() {
   if (existingSurveyUrl) {
     formDataForSurveyPersiste.surveyUrl = existingSurveyUrl;
   }
+  return formDataForSurveyPersiste;
 }
 
 /**
@@ -132,9 +134,11 @@ export function buildSurveyPersisteUrl() {
     formDataForSurveyPersiste["UNO EN CADA AREGLON"] || "";
   const suministroElectrico =
     formDataForSurveyPersiste["Suministro Eléctrico"] || "";
+  const clienteCorreo = document.getElementById("clienteCorreo")?.value || ""; // Get email directly from DOM
+  const clienteID = formDataForSurveyPersiste["ID_CLIENTE"] || ""; // Get the client ID
 
   // Construct the observation string with newlines for separation, ensuring NODO is not duplicated in the text
-  observacion = `Contrato: ${contrato}\nNODO: ${nodo}\nTARJETA: ${tarjeta}\nDIRECCIÓN: ${direccion}\n¿Tiene perdida de monitoreo?:${perdidaMonitoreo}\n${unoEnCadaArreglon}\n${observacion}`;
+  observacion = `Contrato: ${contrato}\nID de Llamada: ${clienteID}\nNodo: ${nodo}\nTarjeta: ${tarjeta}\nDirección: ${direccion}\n¿Tiene perdida de monitoreo?:${perdidaMonitoreo}\n${unoEnCadaArreglon}\nCorreo electrónico: ${clienteCorreo}\n${observacion}`;
 
   if (observacion) {
     // Remove multiple newlines and trim
@@ -225,7 +229,8 @@ export function buildSurveyPersisteUrl() {
   // Define un mapeo de los campos del formulario a los IDs de entrada de Google Forms.
   // Cada objeto contiene el 'entryId' de Google Forms y la clave correspondiente en 'formDataForSurveyPersiste'.
   const surveyFieldMappings = [
-    { entryId: "entry.1756173374", formDataKey: "CEDULA DEL EJECUTIVO" }, // CEDULA DEL EJECUTIVO
+    { entryId: "entry.1756173374", formDataKey: "CEDULA_EJECUTIVO" }, // CEDULA DEL EJECUTIVO
+    { entryId: "entry.423430974", formDataKey: "ID_CLIENTE" }, // Client ID
     { entryId: "entry.596409908", formDataKey: "RUT" }, // RUT DEL CLIENTE
     { entryId: "entry.748509019", formDataKey: "SERVICIO CON LA FALLA" }, // Este campo ahora toma su valor de 'tipoServicio'
     { entryId: "entry.1029252672", formDataKey: "Contrato" }, // ID de Llamada ahora usa Contrato

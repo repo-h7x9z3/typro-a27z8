@@ -237,18 +237,20 @@ window.generarObservacionPrincipal = () => {
 
   if (selectedTypification === "Transferencia (Soporte)") {
     requiredMainFields = [
-      "clienteId",
+      "clienteID",
       "clienteNombre",
       "clienteRUT",
       "clienteTelefono",
+      "clienteCorreo", // New field
       "clienteContrato",
     ];
   } else {
     requiredMainFields = [
-      "clienteId",
+      "clienteID",
       "clienteNombre",
       "clienteRUT",
       "clienteTelefono",
+      "clienteCorreo", // New field
       "clienteDireccion",
       "clienteONT",
       "clienteOLT",
@@ -310,7 +312,7 @@ window.generarObservacionPrincipal = () => {
       // Map internal IDs to more readable keys for the observation
       let key = element.id;
       switch (element.id) {
-        case "clienteId":
+        case "clienteID":
           key = "ID";
           break;
         case "clienteNombre":
@@ -324,6 +326,9 @@ window.generarObservacionPrincipal = () => {
           break;
         case "clienteTelefono":
           key = "TELÉFONO";
+          break;
+        case "clienteCorreo": // New case for Correo
+          key = "CORREO";
           break;
         case "clienteDireccion":
           key = "DIRECCION";
@@ -352,6 +357,10 @@ window.generarObservacionPrincipal = () => {
 
   // Populate formDataForSurvey for the survey button
   Object.assign(formDataForSurvey, mainFormData);
+
+  // The 'documentNumber' in localStorage should refer to the logged-in user's ID,
+  // not the client's ID from the form. The client's ID is already in mainFormData["ID"]
+  // and will be used correctly in formDataForSurvey.
 
   // Collect all survey data
   collectSurveyData();
@@ -447,7 +456,7 @@ window.generarObservacionPrincipal = () => {
       const formattedDate = `${today.getDate()}/${
         today.getMonth() + 1
       }/${today.getFullYear()}`;
-      // Add SOP/MOVIL/SAC, ID, TEL after NODO, conditional on typification
+      // Add SOP/MOVIL/SAC, ID, TEL, CORREO after NODO, conditional on typification
       let prefix = "SOP";
       if (selectedTypification === "Movil") {
         prefix = "MOVIL";
@@ -456,7 +465,9 @@ window.generarObservacionPrincipal = () => {
       }
       preliminaryObservation += `${prefix} ${formattedDate} ID: ${
         mainFormData["ID"] || ""
-      } TEL: ${mainFormData["TELÉFONO"] || ""}\n`;
+      } TEL: ${mainFormData["TELÉFONO"] || ""} CORREO: ${
+        mainFormData["CORREO"] || ""
+      }\n`;
     }
   });
   // Add "TIENE PERDIDA DE MONITOREO?" to the observation
@@ -464,13 +475,15 @@ window.generarObservacionPrincipal = () => {
     preliminaryObservation += `¿Tiene perdida de monitoreo?:${formDataForSurvey["TIENE PERDIDA DE MONITOREO?"]}\n`;
   }
   for (const key in mainFormData) {
-    // Exclude ID, TELÉFONO, and NOMBRE from this loop as they are now handled
+    // Exclude ID, TELÉFONO, NOMBRE, and CORREO from this loop as they are now handled
     if (
       mainFormData[key] &&
       !preliminaryOrder.includes(key) &&
       key !== "ID" &&
       key !== "TELÉFONO" &&
-      key !== "NOMBRE"
+      key !== "NOMBRE" &&
+      key !== "CORREO" &&
+      key !== "clienteID" // Exclude 'clienteID' if it exists as a key
     ) {
       preliminaryObservation += `${key}: ${mainFormData[key]}\n`;
     }
@@ -720,6 +733,7 @@ window.generarObservacionFinal = () => {
     RUT,
     "SERVICIO CON LA FALLA": servicioFalla,
     TELÉFONO,
+    CORREO, // New field
     "DIRECCIÓN CLIENTE": direccionCliente,
     ONT,
     OLT,
@@ -769,7 +783,7 @@ window.generarObservacionFinal = () => {
   if (cambioPilas)
     sondeo += `¿Se realizaron cambios de pilas del control remoto?:${cambioPilas}\n`;
   if (pruebaCruzada) sondeo += `¿Se hizo prueba cruzada?:${pruebaCruzada}\n`;
-  sondeo += `Tiene perdida de monitoreo: Si\n`; // Always add this line
+  // Removed "Tiene perdida de monitoreo" from sondeo string to avoid duplication in observacionForm
   if (soporteGenerado) sondeo += `Soporte Generado:${soporteGenerado}\n`;
   if (instalacionReparacion && instalacionReparacion !== "No")
     sondeo += `Inconvenientes Instalación/Reparación: ${instalacionReparacion}\n`;
@@ -797,6 +811,7 @@ window.generarObservacionFinal = () => {
   // Add main form data to full observation
   const orderedKeys = [
     "RUT",
+    "CORREO",
     "CONTRATO",
     "DIRECCIÓN CLIENTE",
     "ONT",
@@ -811,14 +826,14 @@ window.generarObservacionFinal = () => {
       fullObservation += `${key}: ${formDataForSurvey[key]}\n`;
     }
     if (key === "NODO") {
-      // Add the SOP, date, ID, TEL after NODO
+      // Add the SOP, date, ID, TEL, CORREO after NODO
       const today = new Date();
       const formattedDate = `${today.getDate()}/${
         today.getMonth() + 1
       }/${today.getFullYear()}`;
       fullObservation += `SOP ${formattedDate} ID: ${
         formDataForSurvey["ID"] || ""
-      } TEL: ${TELÉFONO || ""}\n`;
+      } TEL: ${TELÉFONO || ""} CORREO: ${CORREO || ""}\n`;
     }
   });
 
@@ -839,7 +854,8 @@ window.generarObservacionFinal = () => {
   if (controlRemoto) fullObservation += `Control Remoto: ${controlRemoto}\n`;
   if (cambioPilas) fullObservation += `Cambio Pilas: ${cambioPilas}\n`;
   if (pruebaCruzada) fullObservation += `Prueba Cruzada: ${pruebaCruzada}\n`;
-  fullObservation += `Tiene perdida de monitoreo: Si\n`; // Always add this line
+  if (formDataForSurvey["PERDIDA DE MONITOREO"])
+    fullObservation += `Tiene perdida de monitoreo: ${formDataForSurvey["PERDIDA DE MONITOREO"]}\n`;
   if (soporteGenerado)
     fullObservation += `Soporte Generado: ${soporteGenerado}\n`;
   if (instalacionReparacion && instalacionReparacion !== "No")

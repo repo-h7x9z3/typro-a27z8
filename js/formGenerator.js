@@ -18,8 +18,8 @@ export function renderFormFields(tipoTipificacion) {
   // Define common fields
   const commonFields = [
     {
-      id: "clienteId",
-      label: "ID:",
+      id: "clienteID",
+      label: "ID Llamada:",
       type: "text",
       required: true,
       placeholder: "Ej: 123456789",
@@ -32,18 +32,25 @@ export function renderFormFields(tipoTipificacion) {
       placeholder: "Ej: Juan Pérez",
     },
     {
-      id: "clienteContrato",
-      label: "Contrato:",
-      type: "text",
-      required: true,
-      placeholder: "Ej:MTC24/152465",
-    },
-    {
       id: "clienteRUT",
       label: "RUT Cliente:",
       type: "text",
       required: true,
       placeholder: "Ej: 12.345.678-9",
+    },
+    {
+      id: "clienteCorreo",
+      label: "Correo Cliente:",
+      type: "email",
+      required: false,
+      placeholder: "Ej: correo@ejemplo.com",
+    },
+    {
+      id: "clienteContrato",
+      label: "Contrato:",
+      type: "text",
+      required: true,
+      placeholder: "Ej:MTC24/152465",
     },
     {
       id: "clienteTelefono",
@@ -101,8 +108,8 @@ export function renderFormFields(tipoTipificacion) {
   // Define minimal fields for most typification types
   const minimalFields = [
     {
-      id: "clienteId",
-      label: "ID:",
+      id: "clienteID",
+      label: "ID Llamada:",
       type: "text",
       required: true,
       placeholder: "Ej: 123456789",
@@ -113,6 +120,13 @@ export function renderFormFields(tipoTipificacion) {
       type: "text",
       required: true,
       placeholder: "Ej: Juan Pérez",
+    },
+    {
+      id: "clienteCorreo",
+      label: "Correo Cliente:",
+      type: "email",
+      required: false,
+      placeholder: "Ej: correo@ejemplo.com",
     },
     {
       id: "clienteContrato",
@@ -147,7 +161,7 @@ export function renderFormFields(tipoTipificacion) {
       fieldsToRender = commonFields; // "Soporte" now requires all common fields
       break;
     default:
-      fieldsToRender = minimalFields; // Fallback to minimal fields if type is not recognized
+      fieldsToRender = commonFields; // Fallback to common fields if type is not recognized, ensuring correo is always present
       break;
   }
 

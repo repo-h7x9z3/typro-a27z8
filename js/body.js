@@ -6,7 +6,7 @@ document.body.innerHTML = `
           <div class="header-info">
             <div class="header-left">
               <div id="mainLogoContainer" class="logo-container">
-                <img src="https://repo-h7x9z3.github.io/typro-a27z8/assets/logo.svg" alt="Logo Principal" style="max-width: 100%; height: auto;">
+                <img src="assets/logo.svg" alt="Logo Principal" style="max-width: 100%; height: auto;">
               </div>
               <div class="tipificacion-container">
                 <span id="tipificacionSeleccionada"
@@ -281,7 +281,7 @@ document.body.innerHTML = `
         <button class="close-btn" onclick="window.cerrarModal('modalCopia')">
           &times;
         </button>
-        <h2>¡Observación Copiada!</h2>
+        <center><h2>¡Observación Copiada!</h2></center>
         <p>La observación se ha copiado al portapapeles correctamente.</p>
         <p style="color: var(--danger-color); font-weight: bold">
           <strong>Importante:</strong> RECUERDA ADJUNTAR LA DOCUMENTACIÓN
@@ -766,9 +766,8 @@ document.body.innerHTML = `
                 <select id="estadoOnt">
                   <option value="" disabled selected>Seleccione</option>
                   <option value="Conectado">Conectado</option>
-                  <option value="Conectado con pérdida de monitoreo">
-                    Conectado con pérdida de monitoreo
-                  </option>
+                  <option value="Conectado con pérdida de monitoreo">Conectado con pérdida de monitoreo</option>
+                  <option value="Perdida de Señal (LOS)">Perdida de Señal (LOS)</option>
                   <option value="Desconocido">Desconocido</option>
                   <option value="Autofind">Autofind</option>
                   <option value="Offline">Offline</option>
